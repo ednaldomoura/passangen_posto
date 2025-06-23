@@ -10,6 +10,9 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
+            /* Garante que o body não tenha margens para o modal ocupar a tela toda */
+            margin: 0;
+            padding: 0;
         }
         /* Custom scrollbar for better aesthetics */
         ::-webkit-scrollbar {
@@ -37,28 +40,44 @@
             bottom: 0;
             background-color: rgba(0, 0, 0, 0.5); /* Fundo escuro semitransparente */
             display: flex; /* Para centralizar o conteúdo */
-            align-items: center; /* Centraliza verticalmente */
-            justify-content: center; /* Centraliza horizontalmente */
+            align-items: center; /* Centraliza verticalmente (não é crucial para 100% de altura, mas mantém) */
+            justify-content: center; /* Centraliza horizontalmente (não é crucial para 100% de largura, mas mantém) */
             z-index: 999; /* Garante que fique acima de tudo */
             overflow-y: auto; /* Permite scroll se o conteúdo for maior que a tela */
-            padding: 1rem; /* Padding para evitar que o conteúdo encoste nas bordas */
+            /* Removido padding aqui para que o conteúdo preencha as bordas */
         }
 
         .modal-content {
             background-color: white;
-            border-radius: 0.75rem; /* rounded-xl */
+            /* Remover border-radius para cobrir os cantos da tela */
+            /* border-radius: 0.75rem; */
             padding: 1.5rem 2rem; /* p-6 lg:p-8 */
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); /* shadow-2xl */
-            border: 1px solid #f3f4f6; /* border-gray-100 */
-            max-width: 90%; /* Limita a largura para não ficar muito esticado em telas grandes */
-            width: 100%; /* Garante que ocupe a largura disponível dentro do max-width */
-            margin: auto; /* Ajuda na centralização */
+            box-shadow: none; /* Remover sombra para o visual de tela cheia */
+            border: none; /* Remover borda para o visual de tela cheia */
+            
+            /* Ajustes para 100% de largura e altura */
+            width: 100%;
+            height: 100%;
+            max-width: none; /* Remove a restrição de largura máxima */
+            max-height: none; /* Garante que ele possa ocupar 100% da altura */
+            margin: 0; /* Remove margens automáticas para preencher tudo */
+
+            /* Ajustes para conteúdo interno do formulário rolar se for maior que a tela */
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-content form {
+            flex-grow: 1; /* Faz o formulário interno crescer e preencher o espaço restante */
+            overflow-y: auto; /* Permite que o conteúdo do formulário role */
+            padding-bottom: 1rem; /* Adiciona um padding na parte de baixo para o scroll não cortar os botões */
         }
 
         @media (min-width: 1024px) { /* lg breakpoint */
-            .modal-content {
-                max-width: 75%; /* Mais largo em telas grandes */
-            }
+            /* Não há necessidade de overrides para telas grandes se queremos 100% */
+            /* .modal-content {
+                max-width: 75%;
+            } */
         }
     </style>
 </head>
