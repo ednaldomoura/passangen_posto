@@ -27,6 +27,39 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #94a3b8; /* slate-400 */
         }
+
+        /* Classes para o overlay e centralização do modal (formulário) */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5); /* Fundo escuro semitransparente */
+            display: flex; /* Para centralizar o conteúdo */
+            align-items: center; /* Centraliza verticalmente */
+            justify-content: center; /* Centraliza horizontalmente */
+            z-index: 999; /* Garante que fique acima de tudo */
+            overflow-y: auto; /* Permite scroll se o conteúdo for maior que a tela */
+            padding: 1rem; /* Padding para evitar que o conteúdo encoste nas bordas */
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: 0.75rem; /* rounded-xl */
+            padding: 1.5rem 2rem; /* p-6 lg:p-8 */
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); /* shadow-2xl */
+            border: 1px solid #f3f4f6; /* border-gray-100 */
+            max-width: 90%; /* Limita a largura para não ficar muito esticado em telas grandes */
+            width: 100%; /* Garante que ocupe a largura disponível dentro do max-width */
+            margin: auto; /* Ajuda na centralização */
+        }
+
+        @media (min-width: 1024px) { /* lg breakpoint */
+            .modal-content {
+                max-width: 75%; /* Mais largo em telas grandes */
+            }
+        }
     </style>
 </head>
 <body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen antialiased text-gray-800">
@@ -113,80 +146,70 @@
             </div>
         </main>
 
-        <div id="reportFormContainer" class="bg-white shadow-2xl rounded-xl p-6 lg:p-8 hidden border border-gray-100">
-            <h2 class="text-2xl font-semibold text-gray-700 mb-6 flex items-center" id="formTitle">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mr-3 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
-                    <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" />
-                    <path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" />
-                </svg>
-                Adicionar Novo Relatório
-            </h2>
-            <form id="reportForm" class="space-y-6">
-                <input type="hidden" id="reportId" name="reportId">
+        <div id="reportFormContainer" class="modal-overlay hidden">
+            <div class="modal-content">
+                <h2 class="text-2xl font-semibold text-gray-700 mb-6 flex items-center" id="formTitle">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mr-3 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" />
+                        <path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" />
+                    </svg>
+                    Adicionar Novo Relatório
+                </h2>
+                <form id="reportForm" class="space-y-6">
+                    <input type="hidden" id="reportId" name="reportId">
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label for="reportDate" class="block text-sm font-medium text-gray-700 mb-1">Data:</label>
-                        <input type="date" id="reportDate" name="reportDate" class="form-input block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50 p-2.5" required>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div>
+                            <label for="reportDate" class="block text-sm font-medium text-gray-700 mb-1">Data:</label>
+                            <input type="date" id="reportDate" name="reportDate" class="form-input block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50 p-2.5" required>
+                        </div>
+                        <div>
+                            <label for="previousGuard" class="block text-sm font-medium text-gray-700 mb-1">Porteiro Anterior:</label>
+                            <input type="text" id="previousGuard" name="previousGuard" placeholder="Nome do porteiro anterior" class="form-input block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50 p-2.5" required>
+                        </div>
+                        <div>
+                            <label for="entryTime" class="block text-sm font-medium text-gray-700 mb-1">Hora de Entrada:</label>
+                            <input type="time" id="entryTime" name="entryTime" class="form-input block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50 p-2.5" required>
+                        </div>
+                        <div>
+                            <label for="assumingGuard" class="block text-sm font-medium text-gray-700 mb-1">Porteiro Assumindo:</label>
+                            <input type="text" id="assumingGuard" name="assumingGuard" placeholder="Nome do porteiro que está assumindo o turno" class="form-input block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50 p-2.5" required>
+                        </div>
+                        <div>
+                            <label for="exitTime" class="block text-sm font-medium text-gray-700 mb-1">Hora de Saída:</label>
+                            <input type="time" id="exitTime" name="exitTime" class="form-input block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50 p-2.5" required>
+                        </div>
+                        <div>
+                            <label for="deliveredTo" class="block text-sm font-medium text-gray-700 mb-1">Entregue Para:</label>
+                            <input type="text" id="deliveredTo" name="deliveredTo" placeholder="Ex: Porteiro da manhã, Equipe de ronda" class="form-input block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50 p-2.5" required>
+                        </div>
+                        <div class="sm:col-span-2 lg:col-span-3"> <label for="serviceKeys" class="block text-sm font-medium text-gray-700 mb-1">Chaves de Serviço:</label>
+                            <input type="text" id="serviceKeys" name="serviceKeys" placeholder="Ex: Sala de máquinas, Elevador, Quadro de Luz" class="form-input block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50 p-2.5">
+                        </div>
+                        <div class="sm:col-span-2 lg:col-span-3"> <label for="apartmentKeys" class="block text-sm font-medium text-gray-700 mb-1">Chaves de Apartamentos:</label>
+                            <input type="text" id="apartmentKeys" name="apartmentKeys" placeholder="Ex: Apto 101, Apto 305, Apto 402" class="form-input block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50 p-2.5">
+                        </div>
+                        <div class="sm:col-span-2 lg:col-span-3"> <label for="occurrences" class="block text-sm font-medium text-gray-700 mb-1">Ocorrências/Observações:</label>
+                            <textarea id="occurrences" name="occurrences" rows="4" placeholder="Detalhes da passagem de posto, ocorrências, etc." class="form-textarea block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50 p-2.5"></textarea>
+                        </div>
                     </div>
-                    <div>
-                        <label for="previousGuard" class="block text-sm font-medium text-gray-700 mb-1">Porteiro Anterior:</label>
-                        <input type="text" id="previousGuard" name="previousGuard" placeholder="Nome do porteiro anterior" class="form-input block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50 p-2.5" required>
+
+                    <div class="flex justify-end space-x-4 mt-6">
+                        <button type="button" id="cancelFormButton" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2.5 px-5 rounded-lg transition duration-300 ease-in-out flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                            </svg>
+                            Cancelar
+                        </button>
+                        <button type="submit" class="bg-gradient-to-r from-green-500 to-green-700 hover:from-green-600 hover:to-green-800 text-white font-bold py-2.5 px-5 rounded-lg shadow-md transform hover:scale-105 transition duration-300 ease-in-out flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                            </svg>
+                            Salvar Relatório
+                        </button>
                     </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label for="entryTime" class="block text-sm font-medium text-gray-700 mb-1">Hora de Entrada:</label>
-                        <input type="time" id="entryTime" name="entryTime" class="form-input block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50 p-2.5" required>
-                    </div>
-                    <div>
-                        <label for="assumingGuard" class="block text-sm font-medium text-gray-700 mb-1">Porteiro Assumindo:</label>
-                        <input type="text" id="assumingGuard" name="assumingGuard" placeholder="Nome do porteiro que está assumindo o turno" class="form-input block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50 p-2.5" required>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label for="exitTime" class="block text-sm font-medium text-gray-700 mb-1">Hora de Saída:</label>
-                        <input type="time" id="exitTime" name="exitTime" class="form-input block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50 p-2.5" required>
-                    </div>
-                    <div>
-                        <label for="deliveredTo" class="block text-sm font-medium text-gray-700 mb-1">Entregue Para:</label>
-                        <input type="text" id="deliveredTo" name="deliveredTo" placeholder="Ex: Porteiro da manhã, Equipe de ronda" class="form-input block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50 p-2.5" required>
-                    </div>
-                </div>
-
-                <div>
-                    <label for="serviceKeys" class="block text-sm font-medium text-gray-700 mb-1">Chaves de Serviço:</label>
-                    <input type="text" id="serviceKeys" name="serviceKeys" placeholder="Ex: Sala de máquinas, Elevador, Quadro de Luz" class="form-input block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50 p-2.5">
-                </div>
-
-                <div>
-                    <label for="apartmentKeys" class="block text-sm font-medium text-gray-700 mb-1">Chaves de Apartamentos:</label>
-                    <input type="text" id="apartmentKeys" name="apartmentKeys" placeholder="Ex: Apto 101, Apto 305, Apto 402" class="form-input block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50 p-2.5">
-                </div>
-
-                <div>
-                    <label for="occurrences" class="block text-sm font-medium text-gray-700 mb-1">Ocorrências/Observações:</label>
-                    <textarea id="occurrences" name="occurrences" rows="4" placeholder="Detalhes da passagem de posto, ocorrências, etc." class="form-textarea block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50 p-2.5"></textarea>
-                </div>
-
-                <div class="flex justify-end space-x-4 mt-6">
-                    <button type="button" id="cancelFormButton" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2.5 px-5 rounded-lg transition duration-300 ease-in-out flex items-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
-                        </svg>
-                        Cancelar
-                    </button>
-                    <button type="submit" class="bg-gradient-to-r from-green-500 to-green-700 hover:from-green-600 hover:to-green-800 text-white font-bold py-2.5 px-5 rounded-lg shadow-md transform hover:scale-105 transition duration-300 ease-in-out flex items-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                        </svg>
-                        Salvar Relatório
-                    </button>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
 
         <div id="reportDisplayArea" class="bg-white shadow-2xl rounded-xl p-6 lg:p-8 mt-8 hidden border border-gray-100">
@@ -215,11 +238,11 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             const addReportButton = document.getElementById('addReportButton');
-            const exportOptionsButton = document.getElementById('exportOptionsButton'); // Novo
-            const exportDropdown = document.getElementById('exportDropdown'); // Novo
-            const exportCsvButton = document.getElementById('exportCsvButton'); // Novo
-            const exportPdfButton = document.getElementById('exportPdfButton'); // Novo
-            const emailReportButton = document.getElementById('emailReportButton'); // Novo
+            const exportOptionsButton = document.getElementById('exportOptionsButton');
+            const exportDropdown = document.getElementById('exportDropdown');
+            const exportCsvButton = document.getElementById('exportCsvButton');
+            const exportPdfButton = document.getElementById('exportPdfButton');
+            const emailReportButton = document.getElementById('emailReportButton');
 
             const reportFormContainer = document.getElementById('reportFormContainer');
             const cancelFormButton = document.getElementById('cancelFormButton');
@@ -395,6 +418,8 @@
 
                     doc.text(`RELATÓRIO #${index + 1}`, 20, y);
                     y += 7;
+                    doc.text(`  ID: ${report.id}`, 20, y);
+                    y += 7;
                     doc.text(`  Data: ${report.date}`, 20, y);
                     y += 7;
                     doc.text(`  Porteiro Anterior: ${report.previousGuard}`, 20, y);
@@ -436,24 +461,20 @@
                     return;
                 }
 
-                // Usamos o getReportContentAsText para ter o corpo do e-mail
                 const emailBody = getReportContentAsText();
                 const subject = encodeURIComponent(`Relatório de Passagem de Posto - ${new Date().toLocaleDateString('pt-BR')}`);
                 const body = encodeURIComponent(emailBody);
 
-                // Abre o cliente de e-mail padrão do usuário
                 window.location.href = `mailto:?subject=${subject}&body=${body}`;
             }
 
             // --- Event Listeners ---
             loadReports();
 
-            // Toggle para o dropdown de exportação
             exportOptionsButton.addEventListener('click', () => {
                 exportDropdown.classList.toggle('hidden');
             });
 
-            // Oculta o dropdown se clicar fora dele
             document.addEventListener('click', (event) => {
                 if (!exportOptionsButton.contains(event.target) && !exportDropdown.contains(event.target)) {
                     exportDropdown.classList.add('hidden');
@@ -462,20 +483,21 @@
 
             exportCsvButton.addEventListener('click', () => {
                 exportToCsv();
-                exportDropdown.classList.add('hidden'); // Oculta o dropdown após a ação
+                exportDropdown.classList.add('hidden');
             });
 
             exportPdfButton.addEventListener('click', () => {
                 exportToPdf();
-                exportDropdown.classList.add('hidden'); // Oculta o dropdown após a ação
+                exportDropdown.classList.add('hidden');
             });
 
             emailReportButton.addEventListener('click', () => {
                 emailReport();
-                exportDropdown.classList.add('hidden'); // Oculta o dropdown após a ação
+                exportDropdown.classList.add('hidden');
             });
 
             addReportButton.addEventListener('click', () => {
+                // Altera as classes para fazer o formulário aparecer como um modal
                 reportFormContainer.classList.remove('hidden');
                 reportDisplayArea.classList.add('hidden');
                 exportDropdown.classList.add('hidden'); // Oculta o dropdown se abrir o formulário
@@ -534,9 +556,6 @@
                 reportForm.reset();
             });
 
-            // O antigo botão "Gerar Relatório Completo" agora é um item do dropdown
-            // generateReportButton.addEventListener('click', () => { ... }); // Removido ou relocado
-
             closeReportButton.addEventListener('click', () => {
                 reportDisplayArea.classList.add('hidden');
             });
@@ -562,9 +581,10 @@
                         document.getElementById('apartmentKeys').value = reportToEdit.apartmentKeys || '';
                         document.getElementById('occurrences').value = reportToEdit.occurrences;
 
+                        // Altera as classes para fazer o formulário aparecer como um modal
                         reportFormContainer.classList.remove('hidden');
                         reportDisplayArea.classList.add('hidden');
-                        exportDropdown.classList.add('hidden'); // Oculta o dropdown
+                        exportDropdown.classList.add('hidden');
                         formTitle.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mr-3 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
                                                     <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" />
                                                     <path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" />
