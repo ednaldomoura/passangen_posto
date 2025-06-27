@@ -10,9 +10,6 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            /* Garante que o body não tenha margens para o modal ocupar a tela toda */
-            margin: 0;
-            padding: 0;
         }
         /* Custom scrollbar for better aesthetics */
         ::-webkit-scrollbar {
@@ -40,44 +37,28 @@
             bottom: 0;
             background-color: rgba(0, 0, 0, 0.5); /* Fundo escuro semitransparente */
             display: flex; /* Para centralizar o conteúdo */
-            align-items: center; /* Centraliza verticalmente (não é crucial para 100% de altura, mas mantém) */
-            justify-content: center; /* Centraliza horizontalmente (não é crucial para 100% de largura, mas mantém) */
+            align-items: center; /* Centraliza verticalmente */
+            justify-content: center; /* Centraliza horizontalmente */
             z-index: 999; /* Garante que fique acima de tudo */
             overflow-y: auto; /* Permite scroll se o conteúdo for maior que a tela */
-            /* Removido padding aqui para que o conteúdo preencha as bordas */
+            padding: 1rem; /* Padding para evitar que o conteúdo encoste nas bordas */
         }
 
         .modal-content {
             background-color: white;
-            /* Remover border-radius para cobrir os cantos da tela */
-            /* border-radius: 0.75rem; */
+            border-radius: 0.75rem; /* rounded-xl */
             padding: 1.5rem 2rem; /* p-6 lg:p-8 */
-            box-shadow: none; /* Remover sombra para o visual de tela cheia */
-            border: none; /* Remover borda para o visual de tela cheia */
-            
-            /* Ajustes para 100% de largura e altura */
-            width: 100%;
-            height: 100%;
-            max-width: none; /* Remove a restrição de largura máxima */
-            max-height: none; /* Garante que ele possa ocupar 100% da altura */
-            margin: 0; /* Remove margens automáticas para preencher tudo */
-
-            /* Ajustes para conteúdo interno do formulário rolar se for maior que a tela */
-            display: flex;
-            flex-direction: column;
-        }
-
-        .modal-content form {
-            flex-grow: 1; /* Faz o formulário interno crescer e preencher o espaço restante */
-            overflow-y: auto; /* Permite que o conteúdo do formulário role */
-            padding-bottom: 1rem; /* Adiciona um padding na parte de baixo para o scroll não cortar os botões */
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); /* shadow-2xl */
+            border: 1px solid #f3f4f6; /* border-gray-100 */
+            max-width: 90%; /* Limita a largura para não ficar muito esticado em telas grandes */
+            width: 100%; /* Garante que ocupe a largura disponível dentro do max-width */
+            margin: auto; /* Ajuda na centralização */
         }
 
         @media (min-width: 1024px) { /* lg breakpoint */
-            /* Não há necessidade de overrides para telas grandes se queremos 100% */
-            /* .modal-content {
-                max-width: 75%;
-            } */
+            .modal-content {
+                max-width: 75%; /* Mais largo em telas grandes */
+            }
         }
     </style>
 </head>
@@ -160,7 +141,7 @@
                         </tr>
                     </thead>
                     <tbody id="reportsTableBody" class="bg-white divide-y divide-gray-200">
-                        </tbody>
+                    </tbody>
                 </table>
             </div>
         </main>
@@ -317,6 +298,12 @@
                         <td class="py-3 px-6 text-sm text-gray-700">${report.occurrences || '<span class="text-gray-400">Nenhuma</span>'}</td>
                         <td class="py-3 px-6 text-center">
                             <div class="flex items-center justify-center space-x-2">
+                                <button data-id="${report.id}" class="view-button bg-purple-500 hover:bg-purple-600 text-white font-bold p-2 rounded-full shadow-md transform hover:scale-110 transition duration-200 ease-in-out" title="Ver Detalhes">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                        <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                                        <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />
+                                    </svg>
+                                </button>
                                 <button data-id="${report.id}" class="edit-button bg-yellow-400 hover:bg-yellow-500 text-white font-bold p-2 rounded-full shadow-md transform hover:scale-110 transition duration-200 ease-in-out" title="Editar">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                         <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" />
@@ -338,27 +325,37 @@
             // --- Funções de Exportação ---
 
             // Gera o conteúdo de texto do relatório (usado por PDF e E-mail)
-            function getReportContentAsText() {
-                if (reports.length === 0) {
+            function getReportContentAsText(singleReport = null) {
+                let itemsToExport = reports;
+                let header = `RELATÓRIO DE PASSAGEM DE POSTO - ${new Date().toLocaleDateString('pt-BR')}\n`;
+                header += `Data de Geração: ${new Date().toLocaleString('pt-BR')}\n`;
+                header += `--------------------------------------------------------------------------------------------------------------------------------\n\n`;
+
+                if (singleReport) {
+                    itemsToExport = [singleReport];
+                    header = `RELATÓRIO DE PASSAGEM DE POSTO DETALHADO - ID: ${singleReport.id}\n`;
+                    header += `Data de Geração: ${new Date().toLocaleString('pt-BR')}\n`;
+                    header += `--------------------------------------------------------------------------------------------------------------------------------\n\n`;
+                }
+
+
+                if (itemsToExport.length === 0) {
                     return 'Nenhum relatório para exportar.';
                 }
 
-                let reportText = `RELATÓRIO DE PASSAGEM DE POSTO - ${new Date().toLocaleDateString('pt-BR')}\n`;
-                reportText += `Data de Geração: ${new Date().toLocaleString('pt-BR')}\n`;
-                reportText += `--------------------------------------------------------------------------------------------------------------------------------\n\n`;
+                let reportText = header;
 
-                reports.forEach((report, index) => {
-                    reportText += `RELATÓRIO #${index + 1}\n`;
-                    reportText += `  ID: ${report.id}\n`;
-                    reportText += `  Data: ${report.date}\n`;
-                    reportText += `  Porteiro Anterior: ${report.previousGuard}\n`;
-                    reportText += `  Hora Entrada: ${report.entryTime}\n`;
-                    reportText += `  Porteiro Assumindo: ${report.assumingGuard}\n`;
-                    reportText += `  Hora Saída: ${report.exitTime}\n`;
-                    reportText += `  Entregue Para: ${report.deliveredTo}\n`;
-                    reportText += `  Chaves de Serviço: ${report.serviceKeys || 'Não Informado'}\n`;
-                    reportText += `  Chaves de Apartamentos: ${report.apartmentKeys || 'Não Informado'}\n`;
-                    reportText += `  Ocorrências: ${report.occurrences || 'Nenhuma Ocorrência Registrada'}\n`;
+                itemsToExport.forEach((report, index) => {
+                    reportText += `RELATÓRIO #${singleReport ? report.id : (index + 1)}\n`; // Use ID if single report, otherwise index
+                    reportText += `   Data: ${report.date}\n`;
+                    reportText += `   Porteiro Anterior: ${report.previousGuard}\n`;
+                    reportText += `   Hora Entrada: ${report.entryTime}\n`;
+                    reportText += `   Porteiro Assumindo: ${report.assumingGuard}\n`;
+                    reportText += `   Hora Saída: ${report.exitTime}\n`;
+                    reportText += `   Entregue Para: ${report.deliveredTo}\n`;
+                    reportText += `   Chaves de Serviço: ${report.serviceKeys || 'Não Informado'}\n`;
+                    reportText += `   Chaves de Apartamentos: ${report.apartmentKeys || 'Não Informado'}\n`;
+                    reportText += `   Ocorrências: ${report.occurrences || 'Nenhuma Ocorrência Registrada'}\n`;
                     reportText += `--------------------------------------------------------------------------------------------------------------------------------\n\n`;
                 });
                 return reportText;
@@ -412,12 +409,10 @@
                     return;
                 }
 
-                // Cria uma nova instância jsPDF
                 const doc = new jsPDF();
-
                 const title = "Relatório Completo de Passagem de Posto";
                 const dateGenerated = `Data de Geração: ${new Date().toLocaleString('pt-BR')}`;
-                let y = 20; // Posição Y inicial
+                let y = 20;
 
                 doc.setFontSize(18);
                 doc.text(title, 105, y, { align: 'center' });
@@ -429,38 +424,34 @@
                 doc.setFontSize(12);
 
                 reports.forEach((report, index) => {
-                    // Adiciona nova página se não houver espaço suficiente
-                    if (y + 80 > doc.internal.pageSize.height - 20) { // 80 é uma estimativa de altura para um relatório, 20 margem inferior
+                    if (y + 80 > doc.internal.pageSize.height - 20) {
                         doc.addPage();
-                        y = 20; // Reseta Y para nova página
+                        y = 20;
                     }
 
                     doc.text(`RELATÓRIO #${index + 1}`, 20, y);
                     y += 7;
-                    doc.text(`  ID: ${report.id}`, 20, y);
+                    doc.text(`   Data: ${report.date}`, 20, y);
                     y += 7;
-                    doc.text(`  Data: ${report.date}`, 20, y);
+                    doc.text(`   Porteiro Anterior: ${report.previousGuard}`, 20, y);
                     y += 7;
-                    doc.text(`  Porteiro Anterior: ${report.previousGuard}`, 20, y);
+                    doc.text(`   Hora Entrada: ${report.entryTime}`, 20, y);
                     y += 7;
-                    doc.text(`  Hora Entrada: ${report.entryTime}`, 20, y);
+                    doc.text(`   Porteiro Assumindo: ${report.assumingGuard}`, 20, y);
                     y += 7;
-                    doc.text(`  Porteiro Assumindo: ${report.assumingGuard}`, 20, y);
+                    doc.text(`   Hora Saída: ${report.exitTime}`, 20, y);
                     y += 7;
-                    doc.text(`  Hora Saída: ${report.exitTime}`, 20, y);
+                    doc.text(`   Entregue Para: ${report.deliveredTo}`, 20, y);
                     y += 7;
-                    doc.text(`  Entregue Para: ${report.deliveredTo}`, 20, y);
+                    doc.text(`   Chaves de Serviço: ${report.serviceKeys || 'Não Informado'}`, 20, y);
                     y += 7;
-                    doc.text(`  Chaves de Serviço: ${report.serviceKeys || 'Não Informado'}`, 20, y);
-                    y += 7;
-                    doc.text(`  Chaves de Apartamentos: ${report.apartmentKeys || 'Não Informado'}`, 20, y);
+                    doc.text(`   Chaves de Apartamentos: ${report.apartmentKeys || 'Não Informado'}`, 20, y);
                     y += 7;
 
-                    // Ocorrências podem ser longas, use textWithAutoBreak
-                    const occurrencesText = `  Ocorrências: ${report.occurrences || 'Nenhuma Ocorrência Registrada'}`;
-                    const splitText = doc.splitTextToSize(occurrencesText, doc.internal.pageSize.width - 40); // 40 = 20px de margem em cada lado
+                    const occurrencesText = `   Ocorrências: ${report.occurrences || 'Nenhuma Ocorrência Registrada'}`;
+                    const splitText = doc.splitTextToSize(occurrencesText, doc.internal.pageSize.width - 40);
                     doc.text(splitText, 20, y);
-                    y += (splitText.length * 7) + 10; // Ajusta Y pela altura do texto dividido + um pouco de margem
+                    y += (splitText.length * 7) + 10;
 
                     if (index < reports.length - 1) {
                         doc.text('-----------------------------------------------------------', 20, y);
@@ -480,25 +471,62 @@
                     return;
                 }
 
-                const emailBody = getReportContentAsText();
                 const subject = encodeURIComponent(`Relatório de Passagem de Posto - ${new Date().toLocaleDateString('pt-BR')}`);
-                const body = encodeURIComponent(emailBody);
+                const body = encodeURIComponent(getReportContentAsText()); // Reusing the text content function
 
                 window.location.href = `mailto:?subject=${subject}&body=${body}`;
+                alert('Seu cliente de e-mail será aberto com o relatório preenchido.');
+            }
+
+            // --- Funções de Manipulação do Formulário e Relatórios ---
+
+            function showForm(report = null) {
+                reportForm.reset();
+                reportIdInput.value = '';
+                if (report) {
+                    formTitle.textContent = 'Editar Relatório';
+                    reportIdInput.value = report.id;
+                    document.getElementById('reportDate').value = report.date;
+                    document.getElementById('previousGuard').value = report.previousGuard;
+                    document.getElementById('entryTime').value = report.entryTime;
+                    document.getElementById('assumingGuard').value = report.assumingGuard;
+                    document.getElementById('exitTime').value = report.exitTime;
+                    document.getElementById('deliveredTo').value = report.deliveredTo;
+                    document.getElementById('serviceKeys').value = report.serviceKeys;
+                    document.getElementById('apartmentKeys').value = report.apartmentKeys;
+                    document.getElementById('occurrences').value = report.occurrences;
+                } else {
+                    formTitle.textContent = 'Adicionar Novo Relatório';
+                    // Automatically set today's date for new reports
+                    document.getElementById('reportDate').valueAsDate = new Date();
+                }
+                reportFormContainer.classList.remove('hidden');
+                reportDisplayArea.classList.add('hidden'); // Hide report display if showing
+            }
+
+            function hideForm() {
+                reportFormContainer.classList.add('hidden');
+            }
+
+            function generateUniqueId() {
+                return Date.now().toString(36) + Math.random().toString(36).substr(2);
             }
 
             // --- Event Listeners ---
-            loadReports();
+            addReportButton.addEventListener('click', () => showForm());
+            cancelFormButton.addEventListener('click', hideForm);
 
             exportOptionsButton.addEventListener('click', () => {
                 exportDropdown.classList.toggle('hidden');
             });
 
-            document.addEventListener('click', (event) => {
-                if (!exportOptionsButton.contains(event.target) && !exportDropdown.contains(event.target)) {
+            // Close dropdown if clicked outside
+            window.addEventListener('click', function(e) {
+                if (!exportOptionsButton.contains(e.target) && !exportDropdown.contains(e.target)) {
                     exportDropdown.classList.add('hidden');
                 }
             });
+
 
             exportCsvButton.addEventListener('click', () => {
                 exportToCsv();
@@ -515,110 +543,78 @@
                 exportDropdown.classList.add('hidden');
             });
 
-            addReportButton.addEventListener('click', () => {
-                // Altera as classes para fazer o formulário aparecer como um modal
-                reportFormContainer.classList.remove('hidden');
-                reportDisplayArea.classList.add('hidden');
-                exportDropdown.classList.add('hidden'); // Oculta o dropdown se abrir o formulário
-                formTitle.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mr-3 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
-                                            <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" />
-                                            <path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" />
-                                        </svg> Adicionar Novo Relatório`;
-                reportForm.reset();
-                reportIdInput.value = '';
-            });
-
-            cancelFormButton.addEventListener('click', () => {
-                reportFormContainer.classList.add('hidden');
-            });
 
             reportForm.addEventListener('submit', (e) => {
                 e.preventDefault();
+                const formData = new FormData(reportForm);
+                const reportData = {
+                    date: formData.get('reportDate'),
+                    previousGuard: formData.get('previousGuard'),
+                    entryTime: formData.get('entryTime'),
+                    assumingGuard: formData.get('assumingGuard'),
+                    exitTime: formData.get('exitTime'),
+                    deliveredTo: formData.get('deliveredTo'),
+                    serviceKeys: formData.get('serviceKeys'),
+                    apartmentKeys: formData.get('apartmentKeys'),
+                    occurrences: formData.get('occurrences')
+                };
 
-                const id = reportIdInput.value;
-                const date = document.getElementById('reportDate').value;
-                const previousGuard = document.getElementById('previousGuard').value;
-                const entryTime = document.getElementById('entryTime').value;
-                const assumingGuard = document.getElementById('assumingGuard').value;
-                const exitTime = document.getElementById('exitTime').value;
-                const deliveredTo = document.getElementById('deliveredTo').value;
-                const serviceKeys = document.getElementById('serviceKeys').value;
-                const apartmentKeys = document.getElementById('apartmentKeys').value;
-                const occurrences = document.getElementById('occurrences').value;
-
-                if (!date || !previousGuard || !entryTime || !assumingGuard || !exitTime || !deliveredTo) {
-                    alert('Por favor, preencha todos os campos obrigatórios.');
-                    return;
-                }
-
-                if (id) {
-                    const reportIndex = reports.findIndex(r => r.id === id);
-                    if (reportIndex !== -1) {
-                        reports[reportIndex] = {
-                            ...reports[reportIndex],
-                            date, previousGuard, entryTime, assumingGuard, exitTime, deliveredTo, serviceKeys, apartmentKeys, occurrences
-                        };
+                const reportId = formData.get('reportId');
+                if (reportId) {
+                    // Edit existing report
+                    const index = reports.findIndex(r => r.id === reportId);
+                    if (index !== -1) {
+                        reports[index] = { ...reports[index], ...reportData };
                         alert('Relatório atualizado com sucesso!');
                     }
                 } else {
-                    const newReport = {
-                        id: Date.now().toString(),
-                        date, previousGuard, entryTime, assumingGuard, exitTime, deliveredTo, serviceKeys, apartmentKeys, occurrences
-                    };
-                    reports.push(newReport);
+                    // Add new report
+                    reportData.id = generateUniqueId();
+                    reports.push(reportData);
                     alert('Novo relatório adicionado com sucesso!');
                 }
 
                 saveReports();
                 renderReports();
-                reportFormContainer.classList.add('hidden');
-                reportForm.reset();
+                hideForm();
+            });
+
+            reportsTableBody.addEventListener('click', (e) => {
+                // Edit button
+                if (e.target.closest('.edit-button')) {
+                    const id = e.target.closest('.edit-button').dataset.id;
+                    const reportToEdit = reports.find(r => r.id === id);
+                    if (reportToEdit) {
+                        showForm(reportToEdit);
+                    }
+                }
+                // Delete button
+                if (e.target.closest('.delete-button')) {
+                    const id = e.target.closest('.delete-button').dataset.id;
+                    if (confirm('Tem certeza que deseja excluir este relatório?')) {
+                        reports = reports.filter(r => r.id !== id);
+                        saveReports();
+                        renderReports();
+                        alert('Relatório excluído com sucesso!');
+                    }
+                }
+                // View button
+                if (e.target.closest('.view-button')) {
+                    const id = e.target.closest('.view-button').dataset.id;
+                    const reportToView = reports.find(r => r.id === id);
+                    if (reportToView) {
+                        fullReportContent.textContent = getReportContentAsText(reportToView);
+                        reportDisplayArea.classList.remove('hidden');
+                    }
+                }
             });
 
             closeReportButton.addEventListener('click', () => {
                 reportDisplayArea.classList.add('hidden');
             });
 
-            reportsTableBody.addEventListener('click', (e) => {
-                const targetButton = e.target;
-                const button = targetButton.closest('button');
-                if (!button) return;
-
-                const reportId = button.dataset.id;
-
-                if (button.classList.contains('edit-button')) {
-                    const reportToEdit = reports.find(r => r.id === reportId);
-                    if (reportToEdit) {
-                        reportIdInput.value = reportToEdit.id;
-                        document.getElementById('reportDate').value = reportToEdit.date;
-                        document.getElementById('previousGuard').value = reportToEdit.previousGuard;
-                        document.getElementById('entryTime').value = reportToEdit.entryTime;
-                        document.getElementById('assumingGuard').value = reportToEdit.assumingGuard;
-                        document.getElementById('exitTime').value = reportToEdit.exitTime;
-                        document.getElementById('deliveredTo').value = reportToEdit.deliveredTo;
-                        document.getElementById('serviceKeys').value = reportToEdit.serviceKeys || '';
-                        document.getElementById('apartmentKeys').value = reportToEdit.apartmentKeys || '';
-                        document.getElementById('occurrences').value = reportToEdit.occurrences;
-
-                        // Altera as classes para fazer o formulário aparecer como um modal
-                        reportFormContainer.classList.remove('hidden');
-                        reportDisplayArea.classList.add('hidden');
-                        exportDropdown.classList.add('hidden');
-                        formTitle.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mr-3 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
-                                                    <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" />
-                                                    <path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" />
-                                                </svg> Editar Relatório`;
-                    }
-                } else if (button.classList.contains('delete-button')) {
-                    const confirmation = confirm('Tem certeza que deseja excluir este relatório?');
-                    if (confirmation) {
-                        reports = reports.filter(r => r.id !== reportId);
-                        saveReports();
-                        renderReports();
-                        alert('Relatório excluído com sucesso!');
-                    }
-                }
-            });
+            // Initial load
+            loadReports();
         });
     </script>
 </body>
